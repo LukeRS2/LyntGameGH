@@ -33,5 +33,12 @@ public static class scr_Models
         public float JumpingFalloff;
     }
 
+    [Serializable]
+    public class CharacterStance
+    {
+        public float CameraHeight;
+        public CapsuleCollider StanceCollider;
+    }
+
     #endregion
 }
