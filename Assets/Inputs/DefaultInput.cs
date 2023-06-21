@@ -225,6 +225,54 @@ public partial class @DefaultInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Weapon"",
+            ""id"": ""4a09fdd2-9d3d-4537-bf02-d2135d642ad1"",
+            ""actions"": [
+                {
+                    ""name"": ""Fire2Pressed"",
+                    ""type"": ""Button"",
+                    ""id"": ""ea6001a6-6646-482a-b011-133bc0aa9034"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Fire2Released"",
+                    ""type"": ""Button"",
+                    ""id"": ""b16f9997-28b6-46f2-bbe1-ad72f2b1e6b0"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""d3629a0c-2226-4c11-b109-4e84e4dddc96"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Press"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire2Pressed"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fcd12aa0-7816-4bcb-b0e7-bc83c8a407fe"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Press(behavior=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire2Released"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -238,6 +286,10 @@ public partial class @DefaultInput: IInputActionCollection2, IDisposable
         m_Character_Prone = m_Character.FindAction("Prone", throwIfNotFound: true);
         m_Character_Sprint = m_Character.FindAction("Sprint", throwIfNotFound: true);
         m_Character_SprintReleased = m_Character.FindAction("SprintReleased", throwIfNotFound: true);
+        // Weapon
+        m_Weapon = asset.FindActionMap("Weapon", throwIfNotFound: true);
+        m_Weapon_Fire2Pressed = m_Weapon.FindAction("Fire2Pressed", throwIfNotFound: true);
+        m_Weapon_Fire2Released = m_Weapon.FindAction("Fire2Released", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -389,6 +441,60 @@ public partial class @DefaultInput: IInputActionCollection2, IDisposable
         }
     }
     public CharacterActions @Character => new CharacterActions(this);
+
+    // Weapon
+    private readonly InputActionMap m_Weapon;
+    private List<IWeaponActions> m_WeaponActionsCallbackInterfaces = new List<IWeaponActions>();
+    private readonly InputAction m_Weapon_Fire2Pressed;
+    private readonly InputAction m_Weapon_Fire2Released;
+    public struct WeaponActions
+    {
+        private @DefaultInput m_Wrapper;
+        public WeaponActions(@DefaultInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Fire2Pressed => m_Wrapper.m_Weapon_Fire2Pressed;
+        public InputAction @Fire2Released => m_Wrapper.m_Weapon_Fire2Released;
+        public InputActionMap Get() { return m_Wrapper.m_Weapon; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(WeaponActions set) { return set.Get(); }
+        public void AddCallbacks(IWeaponActions instance)
+        {
+            if (instance == null || m_Wrapper.m_WeaponActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_WeaponActionsCallbackInterfaces.Add(instance);
+            @Fire2Pressed.started += instance.OnFire2Pressed;
+            @Fire2Pressed.performed += instance.OnFire2Pressed;
+            @Fire2Pressed.canceled += instance.OnFire2Pressed;
+            @Fire2Released.started += instance.OnFire2Released;
+            @Fire2Released.performed += instance.OnFire2Released;
+            @Fire2Released.canceled += instance.OnFire2Released;
+        }
+
+        private void UnregisterCallbacks(IWeaponActions instance)
+        {
+            @Fire2Pressed.started -= instance.OnFire2Pressed;
+            @Fire2Pressed.performed -= instance.OnFire2Pressed;
+            @Fire2Pressed.canceled -= instance.OnFire2Pressed;
+            @Fire2Released.started -= instance.OnFire2Released;
+            @Fire2Released.performed -= instance.OnFire2Released;
+            @Fire2Released.canceled -= instance.OnFire2Released;
+        }
+
+        public void RemoveCallbacks(IWeaponActions instance)
+        {
+            if (m_Wrapper.m_WeaponActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IWeaponActions instance)
+        {
+            foreach (var item in m_Wrapper.m_WeaponActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_WeaponActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public WeaponActions @Weapon => new WeaponActions(this);
     public interface ICharacterActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -398,5 +504,10 @@ public partial class @DefaultInput: IInputActionCollection2, IDisposable
         void OnProne(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnSprintReleased(InputAction.CallbackContext context);
+    }
+    public interface IWeaponActions
+    {
+        void OnFire2Pressed(InputAction.CallbackContext context);
+        void OnFire2Released(InputAction.CallbackContext context);
     }
 }
