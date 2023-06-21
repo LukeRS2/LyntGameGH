@@ -25,6 +25,20 @@ public class scr_WeaponController : MonoBehaviour
     Vector3 targetWeaponMovementRotation;
     Vector3 targetWeaponMovementRotationVelocity;
 
+    private bool isGroundedTrigger;
+
+    public float fallingDelay;
+
+    [Header("Weapon Sway")]
+    public Transform weaponSwayObject;
+    public float swayAmountA = 1;
+    public float swayAmountB = 2;
+    public float swayScale = 600;
+    public float swayLerpSpeed = 14;
+
+    float swayTime;
+    Vector3 swayPosition;
+
     private void Start()
     {
         newWeaponRotation = transform.localRotation.eulerAngles;
@@ -45,12 +59,19 @@ public class scr_WeaponController : MonoBehaviour
 
         CalculateWeaponRotation();
         SetWeaponAnimations();
+        CalculateWeaponSway();
+
+        
+    }
+
+    public void TriggerJump()
+    {
+        isGroundedTrigger = false;
+        weaponAnimator.SetTrigger("Jump");
     }
 
     private void CalculateWeaponRotation()
     {
-        weaponAnimator.speed = characterController.weaponAnimationSpeed;
-
         targetWeaponRotation.y += settings.SwayAmount * (settings.SwayXInverted ? -characterController.input_View.x : characterController.input_View.x) * Time.deltaTime;
         targetWeaponRotation.x += settings.SwayAmount * (settings.SwayYInverted ? characterController.input_View.y : -characterController.input_View.y) * Time.deltaTime;
 
@@ -73,7 +94,49 @@ public class scr_WeaponController : MonoBehaviour
 
     private void SetWeaponAnimations()
     {
+        if (isGroundedTrigger)
+        {
+            fallingDelay = 0;
+        }
+        else
+        {
+            fallingDelay += Time.deltaTime;
+        }
+
+        if (characterController.isGrounded && !isGroundedTrigger && fallingDelay > 0.1f)
+        {
+            weaponAnimator.SetTrigger("Land");
+            isGroundedTrigger = true;
+        }
+        else if (!characterController.isGrounded && isGroundedTrigger)
+        {
+            Debug.Log("Trigger Falling");
+            weaponAnimator.SetTrigger("Falling");
+            isGroundedTrigger = false;
+        }
+
         weaponAnimator.SetBool("IsSprinting", characterController.isSprinting);
+        weaponAnimator.SetFloat("WeaponAnimationSpeed", characterController.weaponAnimationSpeed);
+    }
+
+    private void CalculateWeaponSway()
+    {
+        var targetPosition = LissajousCurve(swayTime, swayAmountA, swayAmountB) / swayScale;
+
+        swayPosition = Vector3.Lerp(swayPosition, targetPosition, Time.smoothDeltaTime * swayLerpSpeed);
+        swayTime += Time.deltaTime;
+
+        if(swayTime > 6.3f)
+        {
+            swayTime = 0;
+        }
+
+        weaponSwayObject.localPosition = swayPosition; 
+    }
+
+    private Vector3 LissajousCurve(float Time, float A, float B)
+    {
+        return new Vector3(Mathf.Sin(Time), A * Mathf.Sin(B * Time + Mathf.PI));
     }
 
 }
