@@ -8,10 +8,16 @@ public class Gun : MonoBehaviour
 
     public Camera fpsCam;
     public ParticleSystem muzzleFlash;
+    public GameObject impactEffect;
 
     private float nextTimeToFire = 0f;
 
     // Update is called once per frame
+
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
     void Update()
     {
         if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire)
@@ -36,7 +42,7 @@ public class Gun : MonoBehaviour
                 target.TakeDamage(damage);
             }
 
-
+            Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
 
         }
     }
