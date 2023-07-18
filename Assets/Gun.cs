@@ -6,6 +6,8 @@ public class Gun : MonoBehaviour
     public float range = 100f;
     public float fireRate = 9f;
 
+
+
     public Camera fpsCam;
     public ParticleSystem muzzleFlash;
     public GameObject impactEffect;
