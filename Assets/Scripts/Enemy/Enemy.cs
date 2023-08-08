@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
 {
     private StateMachine stateMachine;
     private NavMeshAgent agent;
+    private Animator animator;
     public NavMeshAgent Agent { get => agent; }
     //just for debugging purposes.
     [SerializeField]
@@ -17,11 +18,12 @@ public class Enemy : MonoBehaviour
         stateMachine = GetComponent<StateMachine>();
         agent = GetComponent<NavMeshAgent>();
         stateMachine.Initialise();
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        animator.Play("Run Forward In Place");
     }
 }
