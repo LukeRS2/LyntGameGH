@@ -5,6 +5,7 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour
 {
     private StateMachine stateMachine;
+    public ParticleSystem muzzleFlash;
     private NavMeshAgent agent;
     private Animator animator;
     private GameObject player;

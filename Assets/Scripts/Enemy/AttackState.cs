@@ -7,6 +7,7 @@ public class AttackState : BaseState
     private float moveTimer;
     private float losePlayerTimer;
     private float shotTimer;
+    public ParticleSystem muzzleFlash;
     public override void Enter()
     {
     }
@@ -59,6 +60,7 @@ public class AttackState : BaseState
         bullet.GetComponent<Rigidbody>().velocity = Quaternion.AngleAxis(Random.Range(-2f, 2f), Vector3.up) * shootDirection * 40; 
         Debug.Log("Shoot");
         shotTimer = 0;
+        muzzleFlash.Play();
     }
 
     // Start is called before the first frame update
