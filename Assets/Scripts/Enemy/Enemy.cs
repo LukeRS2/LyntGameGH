@@ -9,8 +9,10 @@ public class Enemy : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     private GameObject player;
+    private Vector3 lastKnowPos;
     public NavMeshAgent Agent { get => agent; }
     public GameObject Player { get => player; }
+    public Vector3 LastKnowPos { get => lastKnowPos; set => lastKnowPos = value; }
 
     public Path path;
     [Header("Sight Values")]
